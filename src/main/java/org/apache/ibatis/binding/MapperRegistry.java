@@ -27,6 +27,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 映射器注册机
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
@@ -34,6 +35,12 @@ import org.apache.ibatis.session.SqlSession;
 public class MapperRegistry {
 
   private final Configuration config;
+  /**
+   * 将已经添加的映射都放入HashMap
+   *
+   * Key是 Class对象，
+   * Value就是MapperProxyFactory 是Mapper代理类的生成工厂
+   */
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 
   public MapperRegistry(Configuration config) {
@@ -41,6 +48,9 @@ public class MapperRegistry {
   }
 
   @SuppressWarnings("unchecked")
+  /**
+   *  返回代理类
+   */
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
     if (mapperProxyFactory == null) {
@@ -57,9 +67,14 @@ public class MapperRegistry {
     return knownMappers.containsKey(type);
   }
 
+  /**
+   *  看一下如何添加一个映射
+   */
   public <T> void addMapper(Class<T> type) {
+    // mapper必须是接口！才会添加
     if (type.isInterface()) {
       if (hasMapper(type)) {
+        // 如果重复添加了，报错
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
       }
       boolean loadCompleted = false;
@@ -72,6 +87,7 @@ public class MapperRegistry {
         parser.parse();
         loadCompleted = true;
       } finally {
+        // 如果加载过程中出现异常需要再将这个mapper从mybatis中删除,这种方式比较丑陋吧，难道是不得已而为之？
         if (!loadCompleted) {
           knownMappers.remove(type);
         }
@@ -80,6 +96,12 @@ public class MapperRegistry {
   }
 
   /**
+   * <mappers>
+   *      <mapper resource="resources/mapper/UserMapper.xml"/>
+   *  </mappers>
+   */
+  /**
+   *
    * Gets the mappers.
    *
    * @return the mappers
@@ -99,6 +121,7 @@ public class MapperRegistry {
    * @since 3.2.2
    */
   public void addMappers(String packageName, Class<?> superType) {
+    // 查找包下所有是superType的类
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> mapperSet = resolverUtil.getClasses();
@@ -108,6 +131,8 @@ public class MapperRegistry {
   }
 
   /**
+   *
+   * 查找包下所有类
    * Adds the mappers.
    *
    * @param packageName

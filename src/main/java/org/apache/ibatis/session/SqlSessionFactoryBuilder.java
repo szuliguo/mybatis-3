@@ -29,6 +29,9 @@ import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
  * Builds {@link SqlSession} instances.
  *
  * @author Clinton Begin
+ *
+ * SqlSessionFactoryBuilder.java类，可以发现都是build的重载方法，主要有有俩种配置文件的输入方式，一个是Reader ，
+ * 另一个是通过InputStream，可以看到里面是通过XMLConfigBuilder.java来解析xml文件的，
  */
 public class SqlSessionFactoryBuilder {
 
@@ -44,8 +47,12 @@ public class SqlSessionFactoryBuilder {
     return build(reader, null, properties);
   }
 
+  /**
+   * 第4种方法是最常用的，它使用了一个参照了XML文档或更特定的SqlMapConfig.xml文件的Reader实例。
+   */
   public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
     try {
+      // 委托XMLConfigBuilder来解析xml文件，并构建
       XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
       return build(parser.parse());
     } catch (Exception e) {
@@ -72,6 +79,11 @@ public class SqlSessionFactoryBuilder {
     return build(inputStream, null, properties);
   }
 
+  /**
+   * 第8种方法和第4种方法差不多，Reader换成了InputStream
+   * 可选的参数是environment和properties。Environment决定加载哪种环境(开发环境/生产环境)，包括数据源和事务管理器。
+   * 如果使用properties，那么就会加载那些properties（属性配置文件），那些属性可以用${propName}语法形式多次用在配置文件中。和Spring很像，一个思想
+   */
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);

@@ -33,6 +33,9 @@ import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 /**
  * @author Clinton Begin
+ *
+ * 是构造SqlSession的默认实现，可以看到实现都是通过configuration该对象来获取配置信息，
+ * 从而构造SqlSession
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
@@ -91,14 +94,19 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     Transaction tx = null;
     try {
       final Environment environment = configuration.getEnvironment();
+      // 通过事务工厂来产生一个事务
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      // 生成一个执行器(事务包含在执行器里)
       final Executor executor = configuration.newExecutor(tx, execType);
+      // 然后产生一个DefaultSqlSession
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
+      // 如果打开事务出错，则关闭它
       closeTransaction(tx); // may have fetched a connection so lets call close()
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
     } finally {
+      //最后清空错误上下文
       ErrorContext.instance().reset();
     }
   }

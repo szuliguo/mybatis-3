@@ -31,6 +31,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ *
+ * 映射器代理，代理模式
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -79,10 +81,15 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+    // 代理以后，所有Mapper的方法调用时，都会调用这个invoke方法
+    // 并不是任何一个方法都需要执行调用代理对象进行执行，如果这个方法是Object中通用的方法（toString、hashCode等）无需执行
+
     try {
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else {
+        // 去缓存中找MapperMethod
         return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
       }
     } catch (Throwable t) {

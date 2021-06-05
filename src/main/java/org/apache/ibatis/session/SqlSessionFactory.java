@@ -21,6 +21,10 @@ import java.sql.Connection;
  * Creates an {@link SqlSession} out of a connection or a DataSource
  *
  * @author Clinton Begin
+ *
+ * SqlSessionFactory 是Mybatis的关键对象， 是创建SqlSession的工厂，工厂模式，
+ * SqlSessionFactory 由 SqlSessionFactoryBuilder 构建，
+ * 每一个MyBatis的应用程序都以一个SqlSessionFactory对象的实例为核心
  */
 public interface SqlSessionFactory {
 

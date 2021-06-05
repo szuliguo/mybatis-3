@@ -90,10 +90,17 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.resource = resource;
   }
 
+  /**
+   *    解析
+   */
   public void parse() {
+    // 如果没有加载过再加载，防止重复加载
     if (!configuration.isResourceLoaded(resource)) {
+      // 解析mapper节点
       configurationElement(parser.evalNode("/mapper"));
+      // 标记一下，已经加载过了
       configuration.addLoadedResource(resource);
+      // 绑定映射器到namespace
       bindMapperForNamespace();
     }
 
@@ -106,18 +113,28 @@ public class XMLMapperBuilder extends BaseBuilder {
     return sqlFragments.get(refid);
   }
 
+  /**
+   * 解析mapper元素
+   */
   private void configurationElement(XNode context) {
     try {
+      //1.配置namespace
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
       builderAssistant.setCurrentNamespace(namespace);
+      //2.配置cache-ref
       cacheRefElement(context.evalNode("cache-ref"));
+      //3.配置cache
       cacheElement(context.evalNode("cache"));
+      //4.配置parameterMap(已经废弃,老式风格的参数映射)
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+      //5.配置resultMap(高级功能)
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      //6.配置sql(定义可重用的 SQL 代码段)
       sqlElement(context.evalNodes("/mapper/sql"));
+      //7.配置select|insert|update|delete TODO
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);

@@ -39,6 +39,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 映射器方法
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
@@ -54,8 +55,12 @@ public class MapperMethod {
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
+  /**
+   *  执行
+   */
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
+    //可以看到执行时就是4种情况，insert|update|delete|select，分别调用SqlSession的4大类方法
     switch (command.getType()) {
       case INSERT: {
         Object param = method.convertArgsToSqlCommandParam(args);
@@ -74,15 +79,19 @@ public class MapperMethod {
       }
       case SELECT:
         if (method.returnsVoid() && method.hasResultHandler()) {
+          //如果有结果处理器
           executeWithResultHandler(sqlSession, args);
           result = null;
         } else if (method.returnsMany()) {
+          //如果结果有多条记录
           result = executeForMany(sqlSession, args);
         } else if (method.returnsMap()) {
+          //如果结果是map
           result = executeForMap(sqlSession, args);
         } else if (method.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
         } else {
+          //否则就是一条记录
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
           if (method.returnsOptional()

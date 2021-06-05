@@ -24,6 +24,7 @@ import org.apache.ibatis.binding.MapperProxy.MapperMethodInvoker;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 映射器代理工厂
  * @author Lasse Voss
  */
 public class MapperProxyFactory<T> {
@@ -44,6 +45,9 @@ public class MapperProxyFactory<T> {
   }
 
   @SuppressWarnings("unchecked")
+  /**
+   * 用JDK自带的动态代理生成映射器
+    */
   protected T newInstance(MapperProxy<T> mapperProxy) {
     return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
   }
