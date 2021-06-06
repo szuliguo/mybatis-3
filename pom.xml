@@ -243,6 +243,7 @@
       <version>42.2.20</version>
       <scope>test</scope>
     </dependency>
+    <!--8.0.25 5.7.29-->
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>

@@ -33,6 +33,9 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * resultMap是Mybatis中重要元素，它可以将查询到的复杂数据（比如查询到几个表中数据）映射到一个结果集当中。
+ * 当返回类型直接是一个ResultMap的时候也是非常有用的，这主要用在进行复杂联合查询上，
+ * 因为进行简单查询是没有什么必要的，可以使用ResultType来处
  */
 public class ResultMap {
   private Configuration configuration;

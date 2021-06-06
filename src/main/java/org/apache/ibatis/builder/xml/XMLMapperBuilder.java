@@ -260,6 +260,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   private void resultMapElements(List<XNode> list) {
     for (XNode resultMapNode : list) {
       try {
+        // 循环遍历resultMap节点
         resultMapElement(resultMapNode);
       } catch (IncompleteElementException e) {
         // ignore, it will be retried
@@ -272,6 +273,14 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) {
+
+//错误上下文
+//取得标示符   ("resultMap[userResultMap]")
+//    <resultMap id="userResultMap" type="User">
+//      <id property="id" column="user_id" />
+//      <result property="username" column="username"/>
+//      <result property="password" column="password"/>
+//    </resultMap>
     ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
     String type = resultMapNode.getStringAttribute("type",
         resultMapNode.getStringAttribute("ofType",
@@ -283,10 +292,13 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
     Discriminator discriminator = null;
     List<ResultMapping> resultMappings = new ArrayList<>(additionalResultMappings);
+    // 遍历resultMap 的子节点
     List<XNode> resultChildren = resultMapNode.getChildren();
     for (XNode resultChild : resultChildren) {
+      //解析result map的constructor
       if ("constructor".equals(resultChild.getName())) {
         processConstructorElement(resultChild, typeClass, resultMappings);
+        //解析result map的discriminator
       } else if ("discriminator".equals(resultChild.getName())) {
         discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
       } else {
@@ -294,13 +306,16 @@ public class XMLMapperBuilder extends BaseBuilder {
         if ("id".equals(resultChild.getName())) {
           flags.add(ResultFlag.ID);
         }
+        // 调5.1.1 buildResultMappingFromContext,得到ResultMapping
         resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
       }
     }
     String id = resultMapNode.getStringAttribute("id",
             resultMapNode.getValueBasedIdentifier());
     String extend = resultMapNode.getStringAttribute("extends");
+    //autoMapping
     Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
+    // 最后再调ResultMapResolver得到ResultMap
     ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator, resultMappings, autoMapping);
     try {
       return resultMapResolver.resolve();
