@@ -641,12 +641,19 @@ public class Configuration {
     return MetaObject.forObject(object, objectFactory, objectWrapperFactory, reflectorFactory);
   }
 
+  /**
+   *  返回的 ParameterHandler 是一个代理对象
+   */
   public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
     parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
     return parameterHandler;
   }
 
+  /**
+   *
+   * 返回的ResultSetHandler 是一个代理对象
+   */
   public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler,
       ResultHandler resultHandler, BoundSql boundSql) {
     ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);
@@ -654,8 +661,14 @@ public class Configuration {
     return resultSetHandler;
   }
 
+  /**
+   *
+   *  返回的 StatementHandler 是一个代理对象
+   */
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    // 创建路由选择语句处理器
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+    // 拦截器在这里执行
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
     return statementHandler;
   }
@@ -664,6 +677,12 @@ public class Configuration {
     return newExecutor(transaction, defaultExecutorType);
   }
 
+  /**
+   * sqlSession执行Executor的方法时候，这里Executor是个动态代理之后的Executor，
+   * 当执行Executor的方法的时候就会执行动态代理的invoke方法，在invoke方法执行我们额外的代码
+   *
+   * 创建 Executor
+   */
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
@@ -673,11 +692,18 @@ public class Configuration {
     } else if (ExecutorType.REUSE == executorType) {
       executor = new ReuseExecutor(this, transaction);
     } else {
+      // 默认是 SimpleExecutor
       executor = new SimpleExecutor(this, transaction);
     }
+
+    // 如果允许开启二级缓存，就包装一下。
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+
+    //在构建Executor的时候，executor = (Executor) interceptorChain.pluginAll(executor);
+    //这里返回的是 Plugin.wrap(target, this);一个动态代理对象
+    //executor返回的是一个代理对象
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
