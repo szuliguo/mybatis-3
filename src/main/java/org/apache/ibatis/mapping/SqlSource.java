@@ -16,6 +16,9 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * MappedStatement 对象的重点属性是SqlSource，本章来介绍SqlSource的构造过程，
+ * 其最终执行的sql字符串就是由SqlSource提供的。
+ *
  * Represents the content of a mapped statement read from an XML file or an annotation.
  * It creates the SQL that will be passed to the database out of the input parameter received from the user.
  *

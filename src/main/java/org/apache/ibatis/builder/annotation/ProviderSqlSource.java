@@ -30,6 +30,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 处理注解Annotation形式的sql。
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */

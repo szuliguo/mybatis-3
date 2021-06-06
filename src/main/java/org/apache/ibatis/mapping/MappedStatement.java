@@ -30,16 +30,25 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * select|insert|update|delete 这些sql标签的解析，
+ * 这些节点会构造成MappedStatement类对象
+ *
+ * MappedStatement类在Mybatis框架中用于表示XML文件中一个sql语句节点，
+ * 即一个<select>或者<update>标签。Mybatis框架在初始化阶段会对XML配置文件进行读取，
+ * 将其中的sql语句节点对象化为一个个MappedStatement对象
  */
 public final class MappedStatement {
 
+  // xml文件位置
   private String resource;
   private Configuration configuration;
+  // 节点中的id属性加要命名空间比如 org.apache.songsy.mapper.RoleMapper.selectByPrimaryKey
   private String id;
   private Integer fetchSize;
   private Integer timeout;
   private StatementType statementType;
   private ResultSetType resultSetType;
+  // SQL源码，实现动态sql
   private SqlSource sqlSource;
   private Cache cache;
   private ParameterMap parameterMap;
@@ -61,6 +70,7 @@ public final class MappedStatement {
     // constructor disabled
   }
 
+  //静态内部类，建造者模式
   public static class Builder {
     private MappedStatement mappedStatement = new MappedStatement();
 

@@ -23,6 +23,7 @@ import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 处理静态sql，无论是静态sql，还是动态sql，最终的处理结果，都是静态sql。
  * @author Clinton Begin
  */
 public class StaticSqlSource implements SqlSource {

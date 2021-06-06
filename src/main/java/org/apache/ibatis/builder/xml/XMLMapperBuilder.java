@@ -141,6 +141,9 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 配置select|insert|update|delete
+   */
   private void buildStatementFromContext(List<XNode> list) {
     if (configuration.getDatabaseId() != null) {
       buildStatementFromContext(list, configuration.getDatabaseId());
@@ -150,10 +153,14 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
+      // 构建所有语句,一个mapper下可以有很多select
+      // 语句比较复杂，核心都在这里面，所以调用XMLStatementBuilder
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
       try {
+        // 核心XMLStatementBuilder.parseStatementNode
         statementParser.parseStatementNode();
       } catch (IncompleteElementException e) {
+        // 如果出现SQL语句不完整，把它记下来，塞到configuration去
         configuration.addIncompleteStatement(statementParser);
       }
     }

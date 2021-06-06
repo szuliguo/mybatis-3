@@ -33,6 +33,7 @@ import org.apache.velocity.runtime.parser.node.SimpleNode;
 
 /**
  * Just a test case. Not a real Velocity implementation.
+ * 只是Mybatis的一个测试类
  */
 public class VelocitySqlSource implements SqlSource {
 
