@@ -131,8 +131,11 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    // 得到绑定sql
     BoundSql boundSql = ms.getBoundSql(parameter);
+    // 创建缓存Key
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
+    // 查询
     return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -140,32 +143,42 @@ public abstract class BaseExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
+    //如果已经关闭，报错
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+    //先清局部缓存，再查询.但仅查询堆栈为0，才清。为了处理递归调用
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
       clearLocalCache();
     }
     List<E> list;
     try {
+      //加一,这样递归调用到上面的时候就不会再清局部缓存了
       queryStack++;
+      // 先根据cachekey从localCache去查
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
+        //若查到localCache缓存，处理localOutputParameterCache
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
+        //从数据库查
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
+      //清空堆栈
       queryStack--;
     }
     if (queryStack == 0) {
+      //延迟加载队列中所有元素
       for (DeferredLoad deferredLoad : deferredLoads) {
         deferredLoad.load();
       }
       // issue #601
+      //清空延迟加载队列
       deferredLoads.clear();
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
+        //如果是STATEMENT，清本地缓存
         clearLocalCache();
       }
     }
@@ -191,12 +204,27 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   *
+   * 创建缓存Key
+   * MyBatis认为，对于两次查询，如果以下条件都完全一样，那么就认为它们是完全相同的两次查询
+   * 1. 传入的statementId，对于MyBatis而言，你要使用它，必须需要一个statementId，
+   * 它代表着你将执行什么样的Sql；
+   * 2. MyBatis自身提供的分页功能是通过RowBounds来实现的，它通过rowBounds.offset和rowBounds.limit来过滤查询出来的结果集，
+   * 这种分页功能是基于查询结果的再过滤，而不是进行数据库的物理分页；
+   * 3. 由于MyBatis底层还是依赖于JDBC实现的，那么，对于两次完全一模一样的查询，MyBatis要保证对于底层JDBC而言，
+   * 也是完全一致的查询才行。而对于JDBC而言，两次查询，只要传入给JDBC的SQL语句完全一致，
+   * 传入的参数也完全一致，就认为是两次查询是完全一致的。
+   *
+   */
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
     CacheKey cacheKey = new CacheKey();
+    // MyBatis 对于其 Key 的生成采取规则为：
+    //[mappedStementId + offset + limit + SQL + queryParams + environment]生成一个哈希码
     cacheKey.update(ms.getId());
     cacheKey.update(rowBounds.getOffset());
     cacheKey.update(rowBounds.getLimit());
@@ -318,15 +346,22 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   *  从数据库查
+   */
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
+    // 先向缓存中放入占位符
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
     try {
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {
+      // 最后删除占位符
       localCache.removeObject(key);
     }
+    // 加入缓存
     localCache.putObject(key, list);
+    // 如果是存储过程，OUT参数也加入缓存
     if (ms.getStatementType() == StatementType.CALLABLE) {
       localOutputParameterCache.putObject(key, parameter);
     }

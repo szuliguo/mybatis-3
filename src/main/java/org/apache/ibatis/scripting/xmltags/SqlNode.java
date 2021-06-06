@@ -16,6 +16,9 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * SqlNode 是 Mybatis 实现动态sql的核心
+ * SqlNode 是 Mybatis 实现动态sql的核心，各种动态标签是通过不同的SqlNode子类来实现的，
+ * 可以看到Mybatis会将xml的sql语句封装为一个个Node节点，不同的节点有不同的处理方式
  * @author Clinton Begin
  */
 public interface SqlNode {

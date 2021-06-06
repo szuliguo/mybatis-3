@@ -24,6 +24,12 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * BoundSql 由 SqlSource 构造而成，最终得到的是JDBC的SQL，
+ * 而实现动态Sql的关键是 各个SqlNode的 apply方法
+ *
+ * BoundSql 由 SqlSource 生产，BoundSql 存放了动态sql处理后的private String sql;,
+ * 动态内容处理完成得到的SQL语句字符串，其中包括?,还有绑定的参数
+ *
  * An actual SQL String got from an {@link SqlSource} after having processed any dynamic content.
  * The SQL may have SQL placeholders "?" and an list (ordered) of an parameter mappings
  * with the additional information for each parameter (at least the property name of the input object to read
@@ -35,10 +41,15 @@ import org.apache.ibatis.session.Configuration;
  */
 public class BoundSql {
 
+  // 处理完成得到的SQL语句字符串，其中包括?,还有绑定的参数
   private final String sql;
+  // 参数映射对象
   private final List<ParameterMapping> parameterMappings;
+  // 外面传入的sql参数
   private final Object parameterObject;
+  // 额外参数？
   private final Map<String, Object> additionalParameters;
+  // 参数元数据
   private final MetaObject metaParameters;
 
   public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {

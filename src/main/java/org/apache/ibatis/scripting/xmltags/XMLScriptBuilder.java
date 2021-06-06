@@ -30,6 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * XMLScriptBuilder类是解析mapper文件中的每个<select/>,<insert/>,<update/>,<delete/>
+ * 节点内的SQL字符串(其中可能包含动态SQL部分,诸如<if/>,<where/>等)
  * @author Clinton Begin
  */
 public class XMLScriptBuilder extends BaseBuilder {
@@ -51,6 +53,9 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
 
+  /**
+   * 通过 nodeHandlers (nodeName) 方法来获取相应的处理类
+   */
   private void initNodeHandlerMap() {
     nodeHandlerMap.put("trim", new TrimHandler());
     nodeHandlerMap.put("where", new WhereHandler());
@@ -75,10 +80,12 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   protected MixedSqlNode parseDynamicTags(XNode node) {
+    // 一行一个SqlNode
     List<SqlNode> contents = new ArrayList<>();
     NodeList children = node.getNode().getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       XNode child = node.newXNode(children.item(i));
+      // 如果节点类型CDATA或者是文本，构造一个TextSqlNode或StaticTextSqlNode
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
@@ -88,12 +95,15 @@ public class XMLScriptBuilder extends BaseBuilder {
         } else {
           contents.add(new StaticTextSqlNode(data));
         }
+        // 如果是xml标签 trim|where|set...
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
         String nodeName = child.getNode().getNodeName();
+        //  得到动态sql标签处理类 trim|where|set...
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
+        // 解析动态结点
         handler.handleNode(child, contents);
         isDynamic = true;
       }

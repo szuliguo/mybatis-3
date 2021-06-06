@@ -19,6 +19,15 @@ package org.apache.ibatis.mapping;
  * MappedStatement 对象的重点属性是SqlSource，本章来介绍SqlSource的构造过程，
  * 其最终执行的sql字符串就是由SqlSource提供的。
  *
+ * Mybatis解析sql的时机，Mybatis对于用户在XXMapper.xml文件中配置的sql解析主要分为2个时机
+ * 1. 静态sql：程序启动的时候解析
+ * 2. 动态sql：用户进行查询等sql相关操作的时候解析
+ *
+ * 什么是静态sql，动态sql？
+ * 1. 如果select|insert|update|delete标签体内包含XML标签或者select|insert|update|delete
+ * 标签体内的sql文本中包含${}参数占位符则为动态sql，否则为静态sql。
+ * 2.其余为静态sql
+ *
  * Represents the content of a mapped statement read from an XML file or an annotation.
  * It creates the SQL that will be passed to the database out of the input parameter received from the user.
  *
