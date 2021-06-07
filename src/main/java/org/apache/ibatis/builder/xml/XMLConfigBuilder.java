@@ -182,6 +182,15 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * context:
+   *
+   * <settings>
+   *     <setting name="cacheEnabled" value="false"/>
+   *     <setting name="useGeneratedKeys" value="true"/>
+   *     <setting name="defaultExecutorType" value="REUSE"/>
+   * </settings>
+   */
   private Properties settingsAsProperties(XNode context) {
     if (context == null) {
       return new Properties();
@@ -336,6 +345,17 @@ public class XMLConfigBuilder extends BaseBuilder {
       if (environment == null) {
         environment = context.getStringAttribute("default");
       }
+      /**
+       * <environment id="development">
+       *     <transactionManager type="JDBC"/>
+       *     <dataSource type="POOLED">
+       *         <property name="driver" value="com.mysql.jdbc.Driver"/>
+       *         <property name="url" value="jdbc:mysql://127.0.0.1:3306/mydb?useUnicode=true"/>
+       *         <property name="username" value="root"/>
+       *         <property name="password" value="root"/>
+       *     </dataSource>
+       * </environment>
+       */
       for (XNode child : context.getChildren()) {
         String id = child.getStringAttribute("id");
         if (isSpecifiedEnvironment(id)) {
@@ -420,6 +440,12 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * parent:
+   * <mappers>
+   *     <mapper resource="org/apache/ibatis/learn/person/PersonMapper.xml"/>
+   * </mappers>
+   */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
@@ -427,6 +453,9 @@ public class XMLConfigBuilder extends BaseBuilder {
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
+/**
+ * <mapper resource="org/apache/ibatis/learn/person/PersonMapper.xml"/>
+ */
         } else {
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");

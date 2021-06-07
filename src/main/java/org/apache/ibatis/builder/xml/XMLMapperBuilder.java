@@ -115,10 +115,19 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   /**
    * 解析mapper元素
+   *
+   * context:
+   * <mapper namespace="org.apache.ibatis.learn.person.PersonMapper">
+   *     <select id="selectOne" resultType="org.apache.ibatis.learn.person.Person">
+   *         select * from person where id = #{id}
+   *     </select>
+   * </mapper>
+   *
    */
   private void configurationElement(XNode context) {
     try {
       //1.配置namespace
+      // org.apache.ibatis.learn.person.PersonMapper
       String namespace = context.getStringAttribute("namespace");
       if (namespace == null || namespace.isEmpty()) {
         throw new BuilderException("Mapper's namespace cannot be empty");
@@ -151,6 +160,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     buildStatementFromContext(list, null);
   }
 
+  /**
+   * <select id="selectOne" resultType="org.apache.ibatis.learn.person.Person">
+   *         select * from person where id = #{id}
+   *  </select>
+   */
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
     for (XNode context : list) {
       // 构建所有语句,一个mapper下可以有很多select
@@ -455,10 +469,12 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void bindMapperForNamespace() {
+    //namespace =  org.apache.ibatis.learn.person.PersonMapper
     String namespace = builderAssistant.getCurrentNamespace();
     if (namespace != null) {
       Class<?> boundType = null;
       try {
+        //  interface org.apache.ibatis.learn.person.PersonMapper
         boundType = Resources.classForName(namespace);
       } catch (ClassNotFoundException e) {
         // ignore, bound type is not required

@@ -131,8 +131,18 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+
+    /**
+     * BoundSql的 sql 值如下:
+     * 其实就是将相关的参数替换为 : ?
+     * select * from person where id = ?
+     */
     // 得到绑定sql
     BoundSql boundSql = ms.getBoundSql(parameter);
+    /**
+     *782299140:505191257:org.apache.ibatis.learn.person.PersonMapper.selectOne:0:2147483647:
+     * select * from person where id = ?:1:development
+     */
     // 创建缓存Key
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
     // 查询

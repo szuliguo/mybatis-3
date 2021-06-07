@@ -77,7 +77,9 @@ public class XMLStatementBuilder extends BaseBuilder {
       return;
     }
 
+    // select
     String nodeName = context.getNode().getNodeName();
+    // SELECT
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
