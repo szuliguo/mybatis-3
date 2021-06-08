@@ -47,6 +47,8 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   @Override
   public SqlSession openSession() {
+     ExecutorType executorType =  configuration.getDefaultExecutorType();
+     System.out.println(executorType);
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
   }
 
