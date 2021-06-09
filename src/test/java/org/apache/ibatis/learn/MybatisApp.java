@@ -45,6 +45,7 @@ import java.io.InputStream;
  * 5. 事务管理
  * https://objcoding.com/2019/03/20/mybatis-sqlsession/
  * http://www.songshuiyang.com/2018/12/18/backend/framework/mybatis/sourceCodeAnalysis/Mybatis%E6%BA%90%E7%A0%81(%E4%BA%8C%E5%8D%81)Spring%20Mybatis%E9%9B%86%E6%88%90%E4%B9%8B%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86/
+ * https://www.cnblogs.com/yougewe/p/10072740.html
  */
 public class MybatisApp {
     public static void main(String[] args) throws IOException {
