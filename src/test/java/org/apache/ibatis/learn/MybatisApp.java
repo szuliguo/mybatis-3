@@ -28,6 +28,8 @@ import java.io.InputStream;
 
 /**
  * src/main/resources/mybatis/mybatis-config.xml
+ * 美团mybatis缓存:
+ * https://tech.meituan.com/2018/01/19/mybatis-cache.html
  */
 public class MybatisApp {
     public static void main(String[] args) throws IOException {

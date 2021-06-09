@@ -120,6 +120,7 @@ public class CachingExecutor implements Executor {
     // 简单的说，就是先查CacheKey，查不到再委托给实际的执行器去查
     if (cache != null) {
       flushCacheIfRequired(ms);
+      // 如果配置使用了二级缓存
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
@@ -127,6 +128,12 @@ public class CachingExecutor implements Executor {
         if (list == null) {
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
           // 可以看到缓存放在tcm 变量上，打开 TransactionalCacheManager 类
+          /**
+           * tcm的put方法并没有直接操作 Cache,
+           * 只是在把这次的数据和key放入待提交的Map中:Map<Object, Object> entriesToAddOnCommit;
+           * 因此如果不调用commit方法的话，由于TranscationalCache的作用，并不会对二级缓存造成直接的影响。
+           * 可以看看 SqlSession的 commit方法中做了什么
+           */
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
@@ -140,9 +147,15 @@ public class CachingExecutor implements Executor {
     return delegate.flushStatements();
   }
 
+  /**
+   * cachingExecutor实现的commit方法
+   */
   @Override
   public void commit(boolean required) throws SQLException {
     delegate.commit(required);
+    /**
+     * commit以后，二级缓存才生效
+     */
     tcm.commit();
   }
 

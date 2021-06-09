@@ -92,6 +92,11 @@ public class TransactionalCache implements Cache {
     entriesToAddOnCommit.clear();
   }
 
+  /**
+   * 看到这里的clearOnCommit就想起刚才TrancationalCache的clear方法设置的标志位，
+   * 真正的清理Cache是放到这里来进行的。
+   * 具体清理的职责委托给了包装的Cache类。之后进入flushPendingEntries方法。
+   */
   public void commit() {
     if (clearOnCommit) {
       delegate.clear();
