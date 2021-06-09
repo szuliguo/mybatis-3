@@ -28,8 +28,19 @@ import java.io.InputStream;
 
 /**
  * src/main/resources/mybatis/mybatis-config.xml
- * 美团mybatis缓存:
+ * 参考文章:
+ *
+ * 1. 美团mybatis缓存:
  * https://tech.meituan.com/2018/01/19/mybatis-cache.html
+ *
+ * 2. mybatis缓存机制:
+ * https://www.cnblogs.com/wuzhenzhao/p/11103043.html
+ *
+ * 3. mybatis源码学习:
+ * http://www.songshuiyang.com/categories/Mybatis/page/2/
+ *
+ * 4. 芋道源码
+ * http://svip.iocoder.cn/categories/MyBatis/
  */
 public class MybatisApp {
     public static void main(String[] args) throws IOException {
