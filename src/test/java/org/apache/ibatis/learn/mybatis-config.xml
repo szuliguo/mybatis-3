@@ -38,13 +38,21 @@
 <!--
     version: $Id: MybatisApp-config.xml 2970 2010-10-30 16:38:36Z eduardo.macarron $
 -->
+
+<!--
+一级缓存。共有两个选项，SESSION或者STATEMENT，默认是SESSION级别，即在一个MyBatis会话中执行的所有语句，
+都会共享这一个缓存。一种是STATEMENT级别，可以理解为缓存只对当前执行的这一个Statement有效。
+-->
 <configuration>
 
     <settings>
         <!-- changes from the defaults for testing -->
         <setting name="cacheEnabled" value="false" />
         <setting name="useGeneratedKeys" value="true" />
-        <setting name="defaultExecutorType" value="SIMPLE" />
+      <setting name="localCacheScope" value="SESSION"/>
+      <setting name="defaultExecutorType" value="SIMPLE" />
+      <!--打印日志-->
+      <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
 
     <environments default="development">
